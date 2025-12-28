@@ -14,85 +14,60 @@ DATABASE_PLACAS = ["BRA2E19", "KGT-4590", "LSU-1234", "ABC7J89", "RIO2K25", "CUS
 
 st.markdown("""
     <style>
-    /* Reset de Fundo e Layout */
-    .stApp {
-        background: #000b14;
-        color: #00f2fe;
-        font-family: 'Courier New', monospace;
-        overflow: hidden;
-    }
-
-    /* MAPA MUNDI ANIMADO - CAMADA FUNDO */
-    .map-bg {
-        position: fixed;
-        top: 0; left: 0;
-        width: 100vw; height: 100vh;
-        background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg');
-        background-size: 300%;
-        background-position: center;
-        opacity: 0.25;
-        filter: invert(1) sepia(1) saturate(5) hue-rotate(175deg) brightness(0.8);
-        animation: pan 150s linear infinite;
-        z-index: -1;
-    }
+    /* Reset total e fundo animado */
+    .stApp { background: #000b14; color: #00f2fe; font-family: 'Courier New', monospace; }
     
-    /* EFEITO DE VARREDURA DE RADAR */
-    .radar-sweep {
-        position: fixed;
-        top: 0; left: 0; width: 100vw; height: 100vh;
-        background: linear-gradient(to bottom, rgba(0,242,254,0) 0%, rgba(0,242,254,0.05) 50%, rgba(0,242,254,0) 100%);
-        background-size: 100% 200%;
-        animation: sweep 4s linear infinite;
-        pointer-events: none;
-        z-index: 0;
+    .map-bg {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background-image: url('https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg');
+        background-size: 300%; background-position: center; opacity: 0.2;
+        filter: invert(1) sepia(1) saturate(5) hue-rotate(175deg) brightness(0.8);
+        animation: pan 150s linear infinite; z-index: -1;
     }
-
     @keyframes pan { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
-    @keyframes sweep { 0% { background-position: 0% -100%; } 100% { background-position: 0% 100%; } }
 
-    /* PAINÉIS TRANSPARENTES (GLASSMORPHISM) */
+    /* Esconder Banners e Menus do Streamlit (Propagandas) */
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    #MainMenu {visibility: hidden;}
+    .stDeployButton {display:none;}
+    div[data-testid="stStatusWidget"] {display:none;}
+
+    /* Painéis de Vidro Táticos */
     .main-panel {
-        background: rgba(0, 20, 35, 0.7);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(0, 242, 254, 0.2);
-        border-radius: 12px;
+        background: rgba(0, 20, 35, 0.75);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(0, 242, 254, 0.3);
+        border-radius: 15px;
         padding: 20px;
-        margin-top: 10px;
-        z-index: 10;
+        margin-bottom: 15px;
     }
 
-    .stTextInput>div>div>input, .stSelectbox>div>div {
-        background: rgba(0, 0, 0, 0.5) !important;
+    /* Ajuste de inputs para iPhone */
+    .stSelectbox>div>div, .stTextInput>div>div>input {
+        background: rgba(0, 0, 0, 0.6) !important;
         color: #00f2fe !important;
-        border: 1px solid rgba(0, 242, 254, 0.3) !important;
-        border-radius: 5px !important;
+        border: 1px solid rgba(0, 242, 254, 0.4) !important;
+        border-radius: 8px !important;
+        height: 45px !important;
     }
     
     .stButton>button {
-        background: rgba(0, 242, 254, 0.15) !important;
+        background: rgba(0, 242, 254, 0.2) !important;
         color: #00f2fe !important;
         border: 1px solid #00f2fe !important;
-        letter-spacing: 2px;
-        font-weight: bold;
-        width: 100%;
+        font-weight: bold; width: 100%; height: 50px;
+        text-transform: uppercase; letter-spacing: 2px;
     }
 
     .terminal-box {
-        background: rgba(0, 10, 20, 0.8);
-        border-left: 3px solid #00f2fe;
-        padding: 10px;
-        font-size: 10px;
-        color: #00f2fe;
-        text-transform: uppercase;
-        margin-top: 15px;
+        background: rgba(0, 0, 0, 0.8);
+        border-left: 4px solid #00f2fe;
+        padding: 12px; font-size: 10px; color: #00f2fe;
+        text-transform: uppercase; margin-top: 10px;
     }
-
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
-    #MainMenu {visibility: hidden;}
     </style>
     <div class="map-bg"></div>
-    <div class="radar-sweep"></div>
     """, unsafe_allow_html=True)
 
 if 'auth' not in st.session_state: st.session_state.auth = False
@@ -102,45 +77,47 @@ if 'radar' not in st.session_state: st.session_state.radar = False
 def add_log(msg):
     st.session_state.logs.insert(0, f"» {time.strftime('%H:%M:%S')} | {msg}")
 
-# --- LOGIN TÁTICO ---
+# --- TELA DE LOGIN ---
 if not st.session_state.auth:
     st.markdown("<div style='height: 10vh;'></div>", unsafe_allow_html=True)
-    st.markdown("<div style='text-align: center;'><img src='https://upload.wikimedia.org/wikipedia/commons/2/25/Seal_of_the_Central_Intelligence_Agency.svg' width='100' style='filter: drop-shadow(0 0 10px #00f2fe); opacity: 0.8;'></div>", unsafe_allow_html=True)
-    st.markdown("<h3 style='text-align: center; color: #00f2fe; letter-spacing: 8px; margin-top: 20px;'>SECURE ACCESS</h3>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align: center;'><img src='https://upload.wikimedia.org/wikipedia/commons/2/25/Seal_of_the_Central_Intelligence_Agency.svg' width='110' style='filter: drop-shadow(0 0 10px #00f2fe);'></div>", unsafe_allow_html=True)
+    st.markdown("<h3 style='text-align: center; color: #00f2fe; letter-spacing: 10px; margin-top: 15px;'>CIA LOGIN</h3>", unsafe_allow_html=True)
     
-    with st.container():
-        st.markdown('<div class="main-panel">', unsafe_allow_html=True)
-        password = st.text_input("ENTER AGENT PIN", type="password", placeholder="••••")
-        if st.button("AUTHORIZE") or password == "0000":
-            if password == "0000":
-                st.session_state.auth = True
-                add_log("UPLINK ESTABLISHED | CAMPOS_RJ")
-                st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+    st.markdown('<div class="main-panel">', unsafe_allow_html=True)
+    password = st.text_input("PIN DE ACESSO", type="password", placeholder="••••")
+    if st.button("AUTHENTICATE") or password == "0000":
+        if password == "0000":
+            st.session_state.auth = True
+            add_log("UPLINK ESTABLISHED | CAMPOS_RJ")
+            st.rerun()
+    st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
-# --- DASHBOARD DE OPERAÇÕES ---
-st.markdown("<div style='text-align: center; font-size: 9px; opacity: 0.8; letter-spacing: 2px;'>GLOBAL_MONITORING: ACTIVE</div>", unsafe_allow_html=True)
+# --- INTERFACE PRINCIPAL (SEM MENU LATERAL) ---
+st.markdown("<div style='text-align: right; font-size: 9px; opacity: 0.8; margin-bottom: 5px;'>UPLINK: ACTIVE | GPS: CAMPOS_RJ</div>", unsafe_allow_html=True)
 
-with st.sidebar:
-    st.markdown("### 🎯 MISSION CONTROL")
-    opcao = st.selectbox("ALVO (WATCHLIST)", DATABASE_PLACAS)
-    target = st.text_input("MANUAL ID", value="" if opcao == "CUSTOM (DIGITAR)" else opcao).upper()
-    
-    if st.button("TOGGLE AUTO-RADAR"):
-        st.session_state.radar = not st.session_state.radar
-        add_log(f"RADAR: {'ON' if st.session_state.radar else 'OFF'}")
-    
-    st.divider()
-    if st.button("LOGOUT"):
-        st.session_state.auth = False
-        st.rerun()
+# 1. CONTROLES DE ALVO (DIRETO NA TELA)
+st.markdown('<div class="main-panel">', unsafe_allow_html=True)
+st.markdown("<p style='font-size: 11px; margin-bottom: 5px;'>🎯 SELECIONAR ALVO DA WATCHLIST:</p>", unsafe_allow_html=True)
+opcao = st.selectbox("", DATABASE_PLACAS, label_visibility="collapsed")
 
-# Scanner de Câmera (Fica dentro de um painel transparente)
+if opcao == "CUSTOM (DIGITAR)":
+    target = st.text_input("DIGITE A PLACA ALVO", placeholder="BRA2E19").upper()
+else:
+    target = opcao
+
+radar_label = "🔴 DESATIVAR RADAR" if st.session_state.radar else "🟢 ATIVAR AUTO-RADAR"
+if st.button(radar_label):
+    st.session_state.radar = not st.session_state.radar
+    add_log(f"RADAR: {'ACTIVE' if st.session_state.radar else 'OFF'}")
+st.markdown('</div>', unsafe_allow_html=True)
+
+# 2. SCANNER ÓPTICO
 st.markdown('<div class="main-panel">', unsafe_allow_html=True)
 img = st.camera_input("")
 st.markdown('</div>', unsafe_allow_html=True)
 
+# LÓGICA DE PROCESSAMENTO
 if st.session_state.radar and img and target:
     b64 = base64.b64encode(img.getvalue()).decode('utf-8')
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
@@ -152,16 +129,16 @@ if st.session_state.radar and img and target:
         if det != "NULL":
             add_log(f"DETETADO: {det}")
             if target in det:
-                add_log("!!! ALVO IDENTIFICADO !!!")
+                add_log("🚨 TARGET MATCH IDENTIFIED! 🚨")
                 st.balloons()
         else:
-            add_log("VARREDURA: PISTA LIMPA")
+            add_log("SCANNING AREA... CLEAR")
     except:
-        add_log("SATELLITE LINK ERROR")
+        add_log("SATELLITE ERROR")
     
     time.sleep(3)
     st.rerun()
 
-# Terminal de Logs
+# 3. TERMINAL DE LOGS
 log_text = "<br>".join(st.session_state.logs[:3])
 st.markdown(f'<div class="terminal-box">{log_text}</div>', unsafe_allow_html=True)
