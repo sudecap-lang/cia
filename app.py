@@ -9,9 +9,18 @@ st.set_page_config(page_title="CIA OPS STATION", layout="centered", initial_side
 # Chave API integrada
 GEMINI_API_KEY = "AIzaSyCX1DQKvznD4oVLdXyZZNQuCuFqMkr4ZPw"
 
+# BANCO DE DADOS DE PLACAS PESQUISADAS
+DATABASE_PLACAS = [
+    "BRA2E19", 
+    "KGT-4590", 
+    "LSU-1234", 
+    "ABC7J89", 
+    "RIO2K25",
+    "CUSTOM (DIGITAR)"
+]
+
 st.markdown("""
     <style>
-    /* Estética Global de Agência */
     .stApp { background-color: #01080b; color: #4facfe; font-family: 'Courier New', monospace; }
     
     .map-bg {
@@ -23,18 +32,21 @@ st.markdown("""
     }
     @keyframes pan { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
 
-    /* Estilo de Painel Central (Login e Dashboard) */
     .main-panel {
         background: rgba(0, 15, 25, 0.85);
         border: 1px solid rgba(0, 242, 254, 0.3);
-        border-radius: 8px;
-        padding: 25px;
-        box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+        border-radius: 8px; padding: 25px;
+    }
+
+    /* Estilo para o Seletor (Dropdown) */
+    .stSelectbox>div>div {
+        background: rgba(0, 5, 10, 0.9) !important; color: #00f2fe !important;
+        border: 1px solid #1a3a5a !important;
     }
 
     .stTextInput>div>div>input {
         background: rgba(0, 5, 10, 0.9) !important; color: #00f2fe !important;
-        border: 1px solid #1a3a5a !important; text-align: center; letter-spacing: 3px;
+        border: 1px solid #1a3a5a !important; text-align: center;
     }
     
     .stButton>button {
@@ -42,8 +54,10 @@ st.markdown("""
         text-transform: uppercase; font-weight: bold; width: 100%; height: 45px;
     }
 
-    .terminal-text { font-size: 10px; color: #4facfe; opacity: 0.7; line-height: 1.4; }
-    .legal-notice { font-size: 8px; color: #3a5a7a; margin-top: 20px; text-align: justify; }
+    .terminal-box {
+        background: rgba(0, 0, 0, 0.8); border-left: 3px solid #4facfe;
+        padding: 15px; font-size: 11px; color: #4facfe;
+    }
 
     header {visibility: hidden;}
     footer {visibility: hidden;}
@@ -52,13 +66,13 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 if 'auth' not in st.session_state: st.session_state.auth = False
-if 'logs' not in st.session_state: st.session_state.logs = []
+if 'logs' not in st.session_state: st.session_state.logs = ["SISTEMA EM ESPERA."]
 if 'radar' not in st.session_state: st.session_state.radar = False
 
 def add_log(msg):
     st.session_state.logs.insert(0, f"» {time.strftime('%H:%M:%S')} | {msg}")
 
-# --- TELA DE LOGIN (DESIGN IPHONE 15) ---
+# --- TELA DE LOGIN ---
 if not st.session_state.auth:
     st.markdown("<div style='height: 8vh;'></div>", unsafe_allow_html=True)
     st.markdown("<div style='text-align: center;'><img src='https://upload.wikimedia.org/wikipedia/commons/2/25/Seal_of_the_Central_Intelligence_Agency.svg' width='120'></div>", unsafe_allow_html=True)
@@ -66,30 +80,36 @@ if not st.session_state.auth:
     
     with st.container():
         st.markdown('<div class="main-panel">', unsafe_allow_html=True)
-        agent_id = st.text_input("AGENT ID", placeholder="0000")
-        password = st.text_input("PASSWORD", type="password", placeholder="••••")
-        if st.button("ACCESS SYSTEM"):
+        password = st.text_input("SECURITY PASSWORD", type="password", placeholder="••••")
+        if st.button("ACCESS SYSTEM") or password == "0000":
             if password == "0000":
                 st.session_state.auth = True
-                add_log("UPLINK ESTABLISHED / CAMPOS_RJ")
+                add_log("UPLINK ACTIVE | CAMPOS_RJ")
                 st.rerun()
-        
-        st.markdown('<p class="terminal-text" style="margin-top:20px;">// TRACK_LINK ESTABLISHED: ONLINE<br>// SECURITY_LEVEL: ALPHA_ONE</p>', unsafe_allow_html=True)
-        st.markdown('<p class="legal-notice">Legal notice: You are entering a secured United States Government system. Unauthorized use is strictly prohibited. All usage is monitored.</p>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     st.stop()
 
 # --- DASHBOARD OPERACIONAL ---
-st.markdown("<div style='text-align: center; font-size: 9px; opacity: 0.6;'>GLOBAL_SCAN_ACTIVE | SATELLITE_UPLINK</div>", unsafe_allow_html=True)
+st.markdown("<div style='text-align: center; font-size: 9px; opacity: 0.6;'>WATCHLIST_UPLINK | SATELLITE_SCAN</div>", unsafe_allow_html=True)
 
 with st.sidebar:
-    st.markdown("### 🛠️ MISSION CONTROL")
-    target = st.text_input("TARGET_ID", placeholder="EX: BRA2E19").upper()
-    if st.button("ACTIVATE AUTO-RADAR"):
+    st.markdown("### 🎯 WATCHLIST CONTROL")
+    
+    # SELETOR DE PLACAS DO BANCO DE DADOS
+    opcao = st.selectbox("SELECIONAR ALVO", DATABASE_PLACAS)
+    
+    if opcao == "CUSTOM (DIGITAR)":
+        target = st.text_input("DIGITAR PLACA", value="").upper()
+    else:
+        target = opcao
+        st.info(f"ALVO ATUAL: {target}")
+
+    if st.button("TOGGLE AUTO-RADAR"):
         st.session_state.radar = not st.session_state.radar
-        add_log("RADAR MODE: " + ("ENABLED" if st.session_state.radar else "DISABLED"))
+        add_log(f"RADAR ON: TARGET {target}")
+    
     st.divider()
-    if st.button("TERMINATE SESSION"):
+    if st.button("LOGOUT"):
         st.session_state.auth = False
         st.rerun()
 
@@ -99,7 +119,7 @@ img = st.camera_input("")
 if st.session_state.radar and img and target:
     b64 = base64.b64encode(img.getvalue()).decode('utf-8')
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={GEMINI_API_KEY}"
-    payload = {"contents": [{"parts": [{"text": "Extract license plate. Return ONLY plate or NULL."}, {"inline_data": {"mime_type": "image/jpeg", "data": b64}}]}]}
+    payload = {"contents": [{"parts": [{"text": "Extract plate or NULL."}, {"inline_data": {"mime_type": "image/jpeg", "data": b64}}]}]}
     
     try:
         res = requests.post(url, json=payload).json()
@@ -107,12 +127,13 @@ if st.session_state.radar and img and target:
         if det != "NULL":
             add_log(f"DETECTED: {det}")
             if target in det:
-                add_log("🚨 TARGET MATCH IDENTIFIED 🚨")
+                add_log(f"🚨 TARGET MATCH: {det} 🚨")
                 st.balloons()
+                st.error(f"CONFIRMADO: ALVO LOCALIZADO ({det})")
         else:
-            add_log("SCANNING CLEAR...")
+            add_log("SCANNING... AREA CLEAR")
     except:
-        add_log("SATELLITE LINK ERROR")
+        add_log("UPLINK ERROR")
     
     time.sleep(4)
     st.rerun()
